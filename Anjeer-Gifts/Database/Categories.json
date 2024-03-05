@@ -1,0 +1,32 @@
+[
+  {
+    "Id": 1,
+    "Name": "Electronics",
+    "CreatedDate": "2022-01-01T00:00:00Z",
+    "ModifiedDate": "2022-01-02T00:00:00Z"
+  },
+  {
+    "Id": 2,
+    "Name": "Clothing",
+    "CreatedDate": "2022-01-01T00:00:00Z",
+    "ModifiedDate": "2022-01-02T00:00:00Z"
+  },
+  {
+    "Id": 3,
+    "Name": "Books",
+    "CreatedDate": "2022-01-01T00:00:00Z",
+    "ModifiedDate": "2022-01-02T00:00:00Z"
+  },
+  {
+    "Id": 4,
+    "Name": "Home Appliances",
+    "CreatedDate": "2022-01-01T00:00:00Z",
+    "ModifiedDate": "2022-01-02T00:00:00Z"
+  },
+  {
+    "Id": 5,
+    "Name": "Sports & Fitness",
+    "CreatedDate": "2022-01-01T00:00:00Z",
+    "ModifiedDate": "2022-01-02T00:00:00Z"
+  }
+]

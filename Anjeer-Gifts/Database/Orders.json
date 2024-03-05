@@ -1,0 +1,12 @@
+[
+  {
+    "CustomerId": 1619704844,
+    "Location": {
+      "longitude": 69.235498,
+      "latitude": 41.287622
+    },
+    "OrderNumber": 2503,
+    "TotalAmount": 89.97,
+    "Date": "2024-03-05T19:15:12.930585Z"
+  }
+]
