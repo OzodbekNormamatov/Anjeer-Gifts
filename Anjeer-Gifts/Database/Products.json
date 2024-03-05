@@ -1,0 +1,82 @@
+[
+  {
+    "Id": 1,
+    "CategoryName": "Electronics",
+    "Name": "Smartphone",
+    "Description": "A high-end smartphone with advanced features.",
+    "PictureUrl": "https://images.macrumors.com/article-new/2023/09/iphone-15-pro-gray.jpg",
+    "Price": 999.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 2,
+    "CategoryName": "Electronics",
+    "Name": "Laptop",
+    "Description": "A powerful laptop for professional use.",
+    "PictureUrl": "https://store.storeimages.cdn-apple.com/4982/as-images.apple.com/is/mbp14-m3-max-pro-spaceblack-select-202310?wid=904&hei=840&fmt=jpeg&qlt=90&.v=1697230830118",
+    "Price": 1499.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 3,
+    "CategoryName": "Clothing",
+    "Name": "T-Shirt",
+    "Description": "A comfortable and stylish t-shirt.",
+    "PictureUrl": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSu0o0Y_hgZB0YQTqW3sGqVUgK9AmVrelj6gw&usqp=CAU",
+    "Price": 29.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 4,
+    "CategoryName": "Books",
+    "Name": "Novel",
+    "Description": "An engaging novel by a renowned author.",
+    "PictureUrl": "https://www.collinsdictionary.com/images/full/novel_114812614.jpg",
+    "Price": 19.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 5,
+    "CategoryName": "Home Appliances",
+    "Name": "Refrigerator",
+    "Description": "A spacious refrigerator with advanced cooling technology.",
+    "PictureUrl": "https://media.us.lg.com/transform/ecomm-PDPGallery-1100x730/a2ec11a7-67ed-47ba-a4a2-04c3f14713ca/md08003944-DZ-12",
+    "Price": 899.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 6,
+    "CategoryName": "Home Appliances",
+    "Name": "Washing Machine",
+    "Description": "A high-capacity washing machine with multiple wash programs.",
+    "PictureUrl": "https://aws-obg-image-lb-3.tcl.com/content/dam/brandsite/region/in/blog/pc/detail/blog-october/the-history-of-the-washing-machine-banner.jpg",
+    "Price": 599.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 7,
+    "CategoryName": "Sports & Fitness",
+    "Name": "Yoga Mat",
+    "Description": "A premium quality yoga mat for comfortable workouts.",
+    "PictureUrl": "https://assetscdn1.paytm.com/images/catalog/product/S/SP/SPOSTRAUSS-NBR-KHEL193268E2FF5019/1612004222297_17.jpg",
+    "Price": 49.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  },
+  {
+    "Id": 8,
+    "CategoryName": "Sports & Fitness",
+    "Name": "Dumbbell Set",
+    "Description": "A set of adjustable dumbbells for strength training.",
+    "PictureUrl": "https://i0.wp.com/www.hygym.co.uk/wp-content/uploads/2020/09/Hex-Dumbbell-set-with-stand-e1689065966936.jpg?fit=2000%2C1725&ssl=1",
+    "Price": 149.99,
+    "CreatedDate": "2022-02-01T00:00:00Z",
+    "ModifiedDate": "2022-02-02T00:00:00Z"
+  }
+]

@@ -1,0 +1,58 @@
+[
+    {
+      "name": "Andijan",
+      "capital": "Andijan"
+    },
+    {
+      "name": "Bukhara",
+      "capital": "Bukhara"
+    },
+    {
+      "name": "Fergana",
+      "capital": "Fergana"
+    },
+    {
+      "name": "Jizzakh",
+      "capital": "Jizzakh"
+    },
+    {
+      "name": "Karakalpakstan",
+      "capital": "Nukus"
+    },
+    {
+      "name": "Namangan",
+      "capital": "Namangan"
+    },
+    {
+      "name": "Navoiy",
+      "capital": "Navoiy"
+    },
+    {
+      "name": "Qashqadaryo",
+      "capital": "Qarshi"
+    },
+    {
+      "name": "Samarkand",
+      "capital": "Samarkand"
+    },
+    {
+      "name": "Sirdaryo",
+      "capital": "Gulistan"
+    },
+    {
+      "name": "Surxondaryo",
+      "capital": "Termiz"
+    },
+    {
+      "name": "Tashkent",
+      "capital": "Tashkent"
+    },
+    {
+      "name": "Tashkent City",
+      "capital": "Tashkent"
+    },
+    {
+      "name": "Xorazm",
+      "capital": "Urgench"
+    }
+]

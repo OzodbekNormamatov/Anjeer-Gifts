@@ -4,7 +4,7 @@ namespace Anjeer_Gifts.Models.Products;
 
 public class Product : Auditable
 {
-    public long CategoryId { get; set; }
+    public string CategoryName { get; set; }
 
     public string Name { get; set; }
 

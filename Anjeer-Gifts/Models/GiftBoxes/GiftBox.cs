@@ -4,7 +4,7 @@ using Telegram.Bot.Types;
 
 namespace Anjeer_Gifts.Models.GiftBoxes;
 
-public class GiftBox : Auditable
+public class GiftBox
 {
     public long UserId { get; set; }
 
