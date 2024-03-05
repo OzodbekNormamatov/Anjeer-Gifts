@@ -1,4 +1,6 @@
-﻿namespace Anjeer_Gifts.Models;
+﻿using Anjeer_Gifts.Models.Commons;
+
+namespace Anjeer_Gifts.Models.Products;
 
 public class Product : Auditable
 {

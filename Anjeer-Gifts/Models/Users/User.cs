@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Anjeer_Gifts.Models.Commons;
 
-namespace Anjeer_Gifts.Models;
+namespace Anjeer_Gifts.Models.Users;
 
 public class User : Auditable
 {
