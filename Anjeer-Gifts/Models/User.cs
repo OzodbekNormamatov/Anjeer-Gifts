@@ -4,10 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Anjeer_Gifts.Models
+namespace Anjeer_Gifts.Models;
+
+public class User : Auditable
 {
-    internal class User
-    {
-    }
+    public string FirstName { get; set; }
+
+    public string LastName { get; set; }
+
+    public string PhoneNumber { get; set; }
+
+    public string RegionName { get; set; }
 }
-8
