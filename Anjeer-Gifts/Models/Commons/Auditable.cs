@@ -1,4 +1,4 @@
-﻿namespace Anjeer_Gifts.Models;
+﻿namespace Anjeer_Gifts.Models.Commons;
 
 public class Auditable
 {
