@@ -37,9 +37,16 @@ public class TelegramService
         {
             var orders = LoadOrders();
             var order = orders.FirstOrDefault(o => o.CustomerId == update.Message.From.Id);
-            order.Location = update.Message.Location;
-            await botClient.SendTextMessageAsync(update.Message.From.Id, "Your order has been placed successfully!");
+            if (update.Message.Location is null)
+            {
+                order.Location = new Location{ Latitude = 41, Longitude = 69 };
+            }
+            else
+            {
+                order.Location = update.Message.Location;
+            }
             SaveOrders(orders);
+            await botClient.SendTextMessageAsync(update.Message.From.Id, "Your order has been placed successfully!");
         }
 
         if (update.CallbackQuery != null)
