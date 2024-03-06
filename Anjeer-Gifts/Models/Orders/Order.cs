@@ -5,6 +5,7 @@ namespace Anjeer_Gifts.Models.Orders;
 
 public class Order
 {
+#pragma warning disable
     [JsonProperty("customerId")]
     public long CustomerId { get; set; }
     [JsonProperty("location")]
