@@ -9,4 +9,5 @@ public class Constants
     public const string CATEGORYPATH = "../../../../Anjeer-Gifts/Database/Categories.json";
     public const string USERPATH = "../../../../Anjeer-Gifts/Database/Users.json";
     public const string REGIONSPATH = "../../../../Anjeer-Gifts/Database/Regions.json";
+    public const string CONNECTION_STRING = "Host=localhost;Port=5432;Database=Anjeer-Gifts;Username=postgres;Password=0511";
 }

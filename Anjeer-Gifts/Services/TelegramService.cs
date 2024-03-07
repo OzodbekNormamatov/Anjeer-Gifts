@@ -11,6 +11,8 @@ using Anjeer_Gifts.Configuration;
 using Anjeer_Gifts.Models.GiftBoxes;
 using Anjeer_Gifts.Models.Products;
 using Anjeer_Gifts.Models.Categories;
+using Anjeer_Gifts.Database;
+using Npgsql;
 
 namespace Anjeer_Gifts.Services;
 
@@ -35,8 +37,31 @@ public class TelegramService
 
         if(update?.Message?.Location is not null)
         {
+            decimal totalPrice = 0;
+
+            var boxes = GetBoxes() ?? new List<GiftBox>();
+
+            var box = boxes.FirstOrDefault(b => b.UserId == update.Message.From.Id);
+
+            var distinctMeals = box.Products.DistinctBy(m => m.Name);
+
+            foreach (var meall in distinctMeals)
+            {
+                var quantity = box.Products.Count(m => m.Name == meall.Name);
+                var price = meall.Price * quantity;
+                totalPrice += price;
+            }
+
+            var order = new Order
+            {
+                CustomerId = update.Message.From.Id,
+                TotalAmount = totalPrice
+            };
+
+            // Generate a unique order number
+            var orderNumber = GenerateOrderNumber();
+            order.OrderNumber = orderNumber;
             var orders = LoadOrders();
-            var order = orders.FirstOrDefault(o => o.CustomerId == update.Message.From.Id);
             if (update.Message.Location is null)
             {
                 order.Location = new Location{ Latitude = 41, Longitude = 69 };
@@ -45,7 +70,10 @@ public class TelegramService
             {
                 order.Location = update.Message.Location;
             }
-            SaveOrders(orders);
+            orders.Add(order);
+            box.Products.Clear();
+            await SaveBoxesAsync(boxes);
+            SaveOrders(orders, order);
             await botClient.SendTextMessageAsync(update.Message.From.Id, "Your order has been placed successfully!");
         }
 
@@ -55,29 +83,6 @@ public class TelegramService
 
             if (update.CallbackQuery.Data == "Order")
             {
-                decimal totalPrice = 0;
-
-                var box = boxes.FirstOrDefault(b => b.UserId == update.CallbackQuery.From.Id);
-
-                var distinctMeals = box.Products.DistinctBy(m => m.Name);
-
-                foreach (var meall in distinctMeals)
-                {
-                    var quantity = box.Products.Count(m => m.Name == meall.Name);
-                    var price = meall.Price * quantity;
-                    totalPrice += price;
-                }
-
-                var order = new Order
-                {
-                    CustomerId = update.CallbackQuery.From.Id,
-                    TotalAmount = totalPrice
-                };
-
-                // Generate a unique order number
-                var orderNumber = GenerateOrderNumber();
-                order.OrderNumber = orderNumber;
-
                 // Ask the user for their location
                 var request = new ReplyKeyboardMarkup(new[]
                 {
@@ -86,16 +91,6 @@ public class TelegramService
 
                 var locationRequestMessage = "Please share the location where you want to deliver your Gift.";
                 await botClient.SendTextMessageAsync(update.CallbackQuery.From.Id, locationRequestMessage, replyMarkup: request);
-
-                // Save the order to the orders.json file
-                var orders = LoadOrders();
-                orders.Add(order);
-                await botClient.SendTextMessageAsync(update.CallbackQuery.From.Id, "Your order has been placed successfully!");
-
-                // Reset the box for the customer
-                box.Products.Clear();
-                await SaveBoxesAsync(boxes);
-                SaveOrders(orders);
             }
             else if (update.CallbackQuery.Data.Contains("__delete"))
             {
@@ -436,6 +431,12 @@ public class TelegramService
         return JsonConvert.DeserializeObject<List<Models.Regions.Region>>(jsonData);
     }
 
+    public string FormatLocation(Location location)
+    {
+        string formattedLocation = $"Latitude: {location.Latitude}, Longitude: {location.Longitude}";
+        return formattedLocation;
+    }
+
     // Format the orders into a readable text format
     private string FormatOrdersText(List<Order> orders)
     {
@@ -482,7 +483,7 @@ public class TelegramService
     }
 
     // Save the orders to the orders.json file
-    private void SaveOrders(List<Order> orders)
+    private void SaveOrders(List<Order> orders, Order order)
     {
         // Serialize the list of Order objects to a JSON string
         string ordersJson = JsonConvert.SerializeObject(orders, Formatting.Indented);
@@ -490,6 +491,35 @@ public class TelegramService
         // Write the JSON string to the orders.json file
         System.IO.File.WriteAllText(Constants.ORDERPATH, ordersJson);
 
+        // Save the orders to the PostgreSQL database using Entity Framework
+        //using (var dbContext = new MyDbContext())
+        //{
+        //    dbContext.Orders.AddRange(orders);
+        //    dbContext.SaveChanges();
+        //}
+
+        using (var connection = new NpgsqlConnection(Constants.CONNECTION_STRING))
+        {
+            connection.Open();
+
+            // Create a command to insert order into the database
+
+            string insertQuery = "INSERT INTO orders (customerid, location, ordernumber, totalamount, date) " +
+                                    "VALUES (@CustomerId, @Location, @OrderNumber, @TotalAmount, @Date)";
+
+            using (var command = new NpgsqlCommand(insertQuery, connection))
+            {
+                // Set the parameter values
+                command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
+                command.Parameters.AddWithValue("@Location", FormatLocation(order.Location));
+                command.Parameters.AddWithValue("@OrderNumber", order.OrderNumber);
+                command.Parameters.AddWithValue("@TotalAmount", order.TotalAmount);
+                command.Parameters.AddWithValue("@Date", order.Date);
+
+                // Execute the insert command
+                command.ExecuteNonQuery();
+            }
+        }
     }
 
     private async Task SaveBoxesAsync(List<GiftBox> boxes)

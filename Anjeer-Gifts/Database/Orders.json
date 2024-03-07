@@ -2,11 +2,31 @@
   {
     "CustomerId": 1619704844,
     "Location": {
-      "longitude": 69.235498,
-      "latitude": 41.287622
+      "longitude": 69.235487,
+      "latitude": 41.287643
     },
     "OrderNumber": 2503,
     "TotalAmount": 89.97,
     "Date": "2024-03-05T19:15:12.930585Z"
+  },
+  {
+    "CustomerId": 1619704844,
+    "Location": {
+      "longitude": 69.235509,
+      "latitude": 41.287601
+    },
+    "OrderNumber": 3953,
+    "TotalAmount": 12499.90,
+    "Date": "2024-03-07T09:42:15.8279118Z"
+  },
+  {
+    "CustomerId": 1619704844,
+    "Location": {
+      "longitude": 69.235498,
+      "latitude": 41.287622
+    },
+    "OrderNumber": 5222,
+    "TotalAmount": 4499.97,
+    "Date": "2024-03-07T09:47:28.8662839Z"
   }
 ]
