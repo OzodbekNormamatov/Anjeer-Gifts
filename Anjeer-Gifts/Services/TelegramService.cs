@@ -11,18 +11,24 @@ using Anjeer_Gifts.Configuration;
 using Anjeer_Gifts.Models.GiftBoxes;
 using Anjeer_Gifts.Models.Products;
 using Anjeer_Gifts.Models.Categories;
-using Anjeer_Gifts.Database;
 using Npgsql;
+using Anjeer_Gifts.AppDbContext;
+using Microsoft.EntityFrameworkCore;
+using Anjeer_Gifts.Models;
 
 namespace Anjeer_Gifts.Services;
 
 public class TelegramService
 {
     private TelegramBotClient botClient;
-    public TelegramService(TelegramBotClient telegramBotClient)
+    private MyDbContext _dbContext;
+
+    public TelegramService(TelegramBotClient telegramBotClient, MyDbContext dbContext)
     {
         this.botClient = telegramBotClient;
+        _dbContext = dbContext;
     }
+
     public async Task Run()
     {
         botClient.StartReceiving(Update, Error);
@@ -43,11 +49,11 @@ public class TelegramService
 
             var box = boxes.FirstOrDefault(b => b.UserId == update.Message.From.Id);
 
-            var distinctMeals = box.Products.DistinctBy(m => m.Name);
+            var distinctMeals = box.AddedProducts.DistinctBy(m => m.Name);
 
             foreach (var meall in distinctMeals)
             {
-                var quantity = box.Products.Count(m => m.Name == meall.Name);
+                var quantity = box.AddedProducts.Count(m => m.Name == meall.Name);
                 var price = meall.Price * quantity;
                 totalPrice += price;
             }
@@ -61,19 +67,19 @@ public class TelegramService
             // Generate a unique order number
             var orderNumber = GenerateOrderNumber();
             order.OrderNumber = orderNumber;
-            var orders = LoadOrders();
+            var orders = await LoadOrdersAsync();
             if (update.Message.Location is null)
             {
-                order.Location = new Location{ Latitude = 41, Longitude = 69 };
+                order.Location = new MyLocation{ Latitude = 41, Longitude = 69 };
             }
             else
             {
-                order.Location = update.Message.Location;
+                order.Location = ConvertToMyLocation(update.Message.Location);
             }
             orders.Add(order);
-            box.Products.Clear();
+            box.AddedProducts.Clear();
             await SaveBoxesAsync(boxes);
-            SaveOrders(orders, order);
+            await SaveOrdersAsync(orders, order);
             await botClient.SendTextMessageAsync(update.Message.From.Id, "Your order has been placed successfully!");
         }
 
@@ -99,13 +105,13 @@ public class TelegramService
 
                 if (box != null)
                 {
-                    var productsToRemove = box.Products.Where(m => m.Name == mealName).ToList();
+                    var productsToRemove = box.AddedProducts.Where(m => m.Name == mealName).ToList();
 
                     if (productsToRemove.Count() > 0)
                     {
                         foreach (var mealToRemove in productsToRemove)
                         {
-                            box.Products.Remove(mealToRemove);
+                            box.AddedProducts.Remove(mealToRemove);
                         }
 
                         await SaveBoxesAsync(boxes);
@@ -127,14 +133,14 @@ public class TelegramService
                     box = new GiftBox()
                     {
                         UserId = update.CallbackQuery.From.Id,
-                        Products = new List<Product>()
+                        AddedProducts = new List<Product>()
                     };
-                    box.Products.Add(Product);
+                    box.AddedProducts.Add(Product);
                     boxes.Add(box);
                 }
                 else
                 {
-                    box.Products.Add(Product);
+                    box.AddedProducts.Add(Product);
                 }
                 await SaveBoxesAsync(boxes);
                 await client.SendTextMessageAsync(update.CallbackQuery.From.Id, "Added to the box");
@@ -146,11 +152,11 @@ public class TelegramService
 
                 if (box != null)
                 {
-                    var mealToRemove = box.Products.FirstOrDefault(m => m.Name == mealName);
+                    var mealToRemove = box.AddedProducts.FirstOrDefault(m => m.Name == mealName);
 
                     if (mealToRemove != null)
                     {
-                        box.Products.Remove(mealToRemove);
+                        box.AddedProducts.Remove(mealToRemove);
                         await SaveBoxesAsync(boxes);
                         await client.SendTextMessageAsync(update.CallbackQuery.From.Id, "Meal removed from the box.");
                     }
@@ -162,7 +168,7 @@ public class TelegramService
             var users = GetCustomers();
             if (users.FirstOrDefault(c => c.Id == message?.From?.Id).RegionName is null)
             {
-                var regions = GetRegions();
+                var regions = await GetRegionsAsync();
                 var buttons = new List<KeyboardButton[]>();
 
                 foreach (var region in regions)
@@ -278,7 +284,7 @@ public class TelegramService
             }
             else if (message.Text == "Categories")
             {
-                var categories = GetCategories();
+                var categories = await GetCategoriesAsync();
                 var buttons = new List<KeyboardButton[]>();
 
                 foreach (var category in categories)
@@ -325,18 +331,18 @@ public class TelegramService
                                 text: "No products found!"
                             );
                     }
-                    else if (box.Products.Count() != 0)
+                    else if (box.AddedProducts.Count() != 0)
                     {
                         var inlineKeyboardButtons = new List<InlineKeyboardButton[]>();
                         decimal totalPrice = 0;
 
                         await botClient.SendTextMessageAsync(message.Chat.Id, "📥 Box:");
 
-                        var distinctMeals = box.Products.DistinctBy(m => m.Name);
+                        var distinctMeals = box.AddedProducts.DistinctBy(m => m.Name);
 
                         foreach (var meal in distinctMeals)
                         {
-                            var quantity = box.Products.Count(m => m.Name == meal.Name);
+                            var quantity = box.AddedProducts.Count(m => m.Name == meal.Name);
                             var price = meal.Price * quantity;
                             totalPrice += price;
 
@@ -416,110 +422,67 @@ public class TelegramService
         }
     }
 
-    private List<Category> GetCategories()
+    public MyLocation ConvertToMyLocation(Location telegramLocation)
     {
-        string jsonFilePath = Constants.CATEGORYPATH;
+        MyLocation myLocation = new MyLocation();
 
-        string jsonData = System.IO.File.ReadAllText(jsonFilePath);
+        myLocation.Latitude = telegramLocation.Latitude;
+        myLocation.Longitude = telegramLocation.Longitude;
 
-        return JsonConvert.DeserializeObject<List<Category>>(jsonData);
+        return myLocation;
     }
 
-    public List<Models.Regions.Region> GetRegions()
+    public async Task<List<Category>> GetCategoriesAsync()
     {
-        string jsonData = System.IO.File.ReadAllText(Constants.REGIONSPATH);
+        return await _dbContext.Categories.ToListAsync();
+    }
+
+    public async Task<List<Models.Regions.Region>> GetRegionsAsync()
+    {
+        string jsonData = await System.IO.File.ReadAllTextAsync(Constants.REGIONSPATH);
         return JsonConvert.DeserializeObject<List<Models.Regions.Region>>(jsonData);
     }
 
     public string FormatLocation(Location location)
     {
-        string formattedLocation = $"Latitude: {location.Latitude}, Longitude: {location.Longitude}";
-        return formattedLocation;
+        return $"Latitude: {location.Latitude}, Longitude: {location.Longitude}";
     }
 
-    // Format the orders into a readable text format
-    private string FormatOrdersText(List<Order> orders)
+    public string FormatOrdersText(List<Order> orders)
     {
         var ordersText = "Your orders:\n\n";
 
         foreach (var order in orders)
         {
-            ordersText += $"Order location: Lat:{order.Location.Latitude} Long : {order.Location.Longitude}\n";
+            ordersText += $"Order location: Lat:{_dbContext.MyLocation.FirstOrDefault(m => m.Id == order.LocationId).Latitude} Long : {_dbContext.MyLocation.FirstOrDefault(m => m.Id == order.LocationId).Longitude}\n";
             ordersText += $"Total Amount: {order.TotalAmount} $\n";
             ordersText += $"Date: {order.Date.ToString("yyyy-MM-dd HH:mm:ss")}\n\n";
         }
 
         return ordersText;
     }
-    // Generate a unique order number
-    private int GenerateOrderNumber()
+
+    public int GenerateOrderNumber()
     {
         Random random = new Random();
         return random.Next(100, 10000);
     }
 
-    // Load existing orders from the orders.json file
-    private List<Order> LoadOrders()
+    public async Task<List<Order>> LoadOrdersAsync()
     {
-        // Read the contents of the orders.json file
-        string ordersJson = System.IO.File.ReadAllText(Constants.ORDERPATH);
-
-        // Deserialize the JSON string to a list of Order objects
-        List<Order> orders = JsonConvert.DeserializeObject<List<Order>>(ordersJson);
-
-        // If the orders.json file doesn't exist or is empty, return an empty list
-        if (orders == null)
-        {
-            orders = new List<Order>();
-        }
-
-        return orders;
-    }
-    // Load orders specifically for the customer
-    private List<Order> LoadOrdersForCustomer(long customerId)
-    {
-        var orders = LoadOrders();
-        return orders.Where(o => o.CustomerId == customerId).ToList();
+        return await _dbContext.Orders.ToListAsync();
     }
 
-    // Save the orders to the orders.json file
-    private void SaveOrders(List<Order> orders, Order order)
+    public List<Order> LoadOrdersForCustomer(long customerId)
     {
-        // Serialize the list of Order objects to a JSON string
-        string ordersJson = JsonConvert.SerializeObject(orders, Formatting.Indented);
+        return _dbContext.Orders.Where(o => o.CustomerId == customerId).ToList();
+    }
 
-        // Write the JSON string to the orders.json file
-        System.IO.File.WriteAllText(Constants.ORDERPATH, ordersJson);
-
-        // Save the orders to the PostgreSQL database using Entity Framework
-        //using (var dbContext = new MyDbContext())
-        //{
-        //    dbContext.Orders.AddRange(orders);
-        //    dbContext.SaveChanges();
-        //}
-
-        using (var connection = new NpgsqlConnection(Constants.CONNECTION_STRING))
-        {
-            connection.Open();
-
-            // Create a command to insert order into the database
-
-            string insertQuery = "INSERT INTO orders (customerid, location, ordernumber, totalamount, date) " +
-                                    "VALUES (@CustomerId, @Location, @OrderNumber, @TotalAmount, @Date)";
-
-            using (var command = new NpgsqlCommand(insertQuery, connection))
-            {
-                // Set the parameter values
-                command.Parameters.AddWithValue("@CustomerId", order.CustomerId);
-                command.Parameters.AddWithValue("@Location", FormatLocation(order.Location));
-                command.Parameters.AddWithValue("@OrderNumber", order.OrderNumber);
-                command.Parameters.AddWithValue("@TotalAmount", order.TotalAmount);
-                command.Parameters.AddWithValue("@Date", order.Date);
-
-                // Execute the insert command
-                command.ExecuteNonQuery();
-            }
-        }
+    public async Task SaveOrdersAsync(List<Order> orders, Order order)
+    {
+        //_dbContext.Orders.AddRange(orders);
+        _dbContext.Orders.Add(order);
+        await _dbContext.SaveChangesAsync();
     }
 
     private async Task SaveBoxesAsync(List<GiftBox> boxes)
@@ -533,14 +496,12 @@ public class TelegramService
 
     public List<User> GetCustomers()
     {
-        string jsonContent = System.IO.File.ReadAllText(Constants.USERPATH);
-        return JsonConvert.DeserializeObject<List<User>>(jsonContent);
+        return _dbContext.Users.ToList();
     }
 
     public List<Product> GetProducts()
     {
-        string jsonContent = System.IO.File.ReadAllText(Constants.PRODUCTPATH);
-        return JsonConvert.DeserializeObject<List<Product>>(jsonContent);
+        return _dbContext.Products.ToList();
     }
 
     public List<GiftBox> GetBoxes()
@@ -551,17 +512,13 @@ public class TelegramService
 
     public Product GetProduct(string name)
     {
-        var meals = GetProducts();
-        return meals.FirstOrDefault(m => m.Name == name);
+        return _dbContext.Products.FirstOrDefault(p => p.Name == name);
     }
 
-    private async Task SaveUsersAsync(List<User> users)
+    public async Task SaveUsersAsync(List<User> users)
     {
-        string userJson = JsonConvert.SerializeObject(users, Formatting.Indented);
-
-        // Write the user JSON to the users.json file
-        string filePath = Constants.USERPATH;
-        await System.IO.File.WriteAllTextAsync(filePath, userJson);
+        _dbContext.Users.AddRange(users);
+        await _dbContext.SaveChangesAsync();
     }
 
     public async static Task Error(ITelegramBotClient client, Exception exception, CancellationToken token)

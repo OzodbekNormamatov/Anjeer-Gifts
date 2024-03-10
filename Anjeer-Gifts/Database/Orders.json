@@ -1,32 +1,52 @@
 [
   {
-    "CustomerId": 1619704844,
-    "Location": {
+    "customerId": 1619704844,
+    "location": {
       "longitude": 69.235487,
       "latitude": 41.287643
     },
-    "OrderNumber": 2503,
-    "TotalAmount": 89.97,
-    "Date": "2024-03-05T19:15:12.930585Z"
+    "orderNumber": 2503,
+    "totalAmount": 89.97,
+    "date": "2024-03-05T19:15:12.930585Z"
   },
   {
-    "CustomerId": 1619704844,
-    "Location": {
+    "customerId": 1619704844,
+    "location": {
       "longitude": 69.235509,
       "latitude": 41.287601
     },
-    "OrderNumber": 3953,
-    "TotalAmount": 12499.90,
-    "Date": "2024-03-07T09:42:15.8279118Z"
+    "orderNumber": 3953,
+    "totalAmount": 12499.90,
+    "date": "2024-03-07T09:42:15.8279118Z"
   },
   {
-    "CustomerId": 1619704844,
-    "Location": {
+    "customerId": 1619704844,
+    "location": {
       "longitude": 69.235498,
       "latitude": 41.287622
     },
-    "OrderNumber": 5222,
-    "TotalAmount": 4499.97,
-    "Date": "2024-03-07T09:47:28.8662839Z"
+    "orderNumber": 5222,
+    "totalAmount": 4499.97,
+    "date": "2024-03-07T09:47:28.8662839Z"
+  },
+  {
+    "customerId": 1619704844,
+    "location": {
+      "longitude": 69.26455,
+      "latitude": 41.322444
+    },
+    "orderNumber": 1366,
+    "totalAmount": 999.99,
+    "date": "2024-03-07T12:11:23.5767558Z"
+  },
+  {
+    "customerId": 1619704844,
+    "location": {
+      "longitude": -0.001061,
+      "latitude": 50.667335
+    },
+    "orderNumber": 305,
+    "totalAmount": 4499.97,
+    "date": "2024-03-07T14:34:54.3378734Z"
   }
 ]
