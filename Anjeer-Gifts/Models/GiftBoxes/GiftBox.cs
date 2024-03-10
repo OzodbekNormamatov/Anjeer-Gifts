@@ -8,8 +8,9 @@ namespace Anjeer_Gifts.Models.GiftBoxes;
 public class GiftBox
 {
 #pragma warning disable
+    public long Id { get; set; }
     [JsonProperty("userId")]
     public long UserId { get; set; }
     [JsonProperty("products")]
-    public List<Product> Products { get; set; }
+    public List<Product> AddedProducts { get; set; }
 }
